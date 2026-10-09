@@ -1,4 +1,4 @@
-# Design brief — algorithms.nymo.finance
+# Design brief — jhu.nymo.finance
 
 Reference: hermes-agent.nousresearch.com (studied 2026-10-09). What makes it work, and what we keep:
 

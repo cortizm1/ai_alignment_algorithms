@@ -16,6 +16,6 @@ text = log.read_text()
 seal = {"hw": int(n), "key": sealing.new_key(), "commitment": sealing.commitment(text),
         "sealed_at": datetime.datetime.now().astimezone().isoformat(timespec="minutes"), "snapshot": text}
 out.write_text(json.dumps(seal, indent=1))
-url = f"https://algorithms.nymo.finance/hw{n}.html"
+url = f"https://jhu.nymo.finance/hw{n}.html"
 print(f"sealed {log} -> {out}\n\nPaste into hw{n}.tex header:\n")
 print(f"\\aireport{{{url}}}{{{seal['key']}}}{{{seal['commitment']}}}")

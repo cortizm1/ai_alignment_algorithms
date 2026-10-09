@@ -1,4 +1,4 @@
-# Transparency site deployment — algorithms.nymo.finance
+# Transparency site deployment — jhu.nymo.finance
 
 ## Pieces
 - Static site built by `tools/publish.py` into `site/` (index + hwN.html; encrypted blobs inline).
@@ -6,7 +6,7 @@
 - Anubis (TecharoHQ) runs as a reverse proxy: browser -> Anubis (:8923) -> nginx static vhost (:3000-ish, localhost only).
   Carlos already runs Anubis on other subdomains, so reuse the same unit/compose pattern: one more
   Anubis instance (or one more route in the existing policy) + one more nginx vhost.
-- TLS: certbot/acme for algorithms.nymo.finance (or wildcard if one exists already).
+- TLS: certbot/acme for jhu.nymo.finance (or wildcard if one exists already).
 - DNS: A/AAAA record `algorithms` -> VPS IP.
 
 ## Seal / submit flow (per homework)
@@ -18,11 +18,11 @@
 ## DNS findings (2026-10-09)
 - nymo.finance is served by OrangeWebsite's nameservers (siti/buffy.ns.orangewebsite.com).
   OrangeWebsite is a WHMCS client area; no public DNS API was found. Add the record by hand:
-  `algorithms  A  93.95.231.30` (the host that already serves rustdesk. and weus.).
+  `jhu  A  93.95.231.30` (the host that already serves rustdesk. and weus.).
   82.221.136.24 is the apex/mail host (shared hosting?), not the VPS.
 - The 32-char token Carlos shared could not be matched to any OrangeWebsite API. Rotate it.
 
 ## Still needed from Carlos
 - VPS: ssh host/user/port (the `nymo` entry in ~/.ssh/config times out), where the existing Anubis + nginx config lives.
 - DNS: provider + API token or just add the A record manually.
-- Confirm subdomain name: `algorithms.nymo.finance` (used in seal.py URL; change there if different).
+- Confirm subdomain name: `jhu.nymo.finance` (used in seal.py URL; change there if different).
