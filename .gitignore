@@ -1,0 +1,46 @@
+# build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+# large / untrusted mirrors and media
+course_site_raw/
+todo/
+done/
+mock_website/
+*.jpg
+*.jpeg
+*.png
+*.HEIC
+*.odt
+*_CV_*.pdf
+# envs, caches
+.venv/
+uv.lock
+playground/.venv/
+.ipynb_checkpoints/
+.pytest_cache/
+__pycache__/
+.~lock.*
+# secrets
+api_token.txt
+git_ai.txt
+*.token
+*.env
+!site/deploy.env.example
+# built site and transcripts (published encrypted via the app, never via git)
+site/
+hw/transcripts/
+# never publish anything resembling homework content or openings
+hw/*/*.tex
+hw/*/*.pdf
+hw/*/feedback/
+hw/*/attempts/
+hw/*/seal.json
+hw/*/solutions.pdf
+hw/*/postmortem.md

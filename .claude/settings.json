@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session_start.sh" } ] }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(pdflatex:*)", "Bash(mutool:*)", "Bash(tools/build.sh:*)", "Bash(tools/new_hw.sh:*)",
+      "Bash(ls:*)", "Bash(cat:*)", "Bash(grep:*)", "Bash(find:*)", "Bash(sed -n:*)", "Bash(head:*)",
+      "Read(course_site_raw/**)", "Read(hw/**)", "Read(study/**)"
+    ],
+    "deny": [ "WebSearch", "WebFetch" ]
+  }
+}
