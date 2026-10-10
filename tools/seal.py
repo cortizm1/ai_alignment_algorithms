@@ -45,6 +45,17 @@ data.mkdir(exist_ok=True)
 public.write_text(json.dumps({"hw": int(n), "status": status, "sessions": sessions, "sealed_at": now,
                               "sealed": crypto.encode_sealed(sealed), "transcript": attachment,
                               "transcript_sessions": [t.name for t in transcripts]}, indent=1))
+# Third-party timestamp: commit and push the public record so GitHub records when C existed.
+try:
+    subprocess.run(["git", "add", str(public.relative_to(ROOT))], cwd=ROOT, check=True)
+    subprocess.run(["git", "commit", "-q", "-m", f"Seal HW{n}: commitment {sealed.commitment.hex()[:16]}"], cwd=ROOT, check=True)
+    env_file = pathlib.Path.home() / ".config/nymo/github.env"
+    tok = next((l.split("=", 1)[1].strip() for l in env_file.read_text().splitlines() if l.startswith("GITHUB_TOKEN=")), "")
+    helper = f"!f() {{ echo username=cortizm1; echo password={tok}; }}; f"
+    subprocess.run(["git", "-c", f"credential.helper={helper}", "push", "-q", "origin", "main"], cwd=ROOT, check=True)
+    print("public record committed and pushed to GitHub (timestamp anchor)")
+except Exception as exc:  # noqa: BLE001
+    print(f"WARNING: git commit/push of the public record failed: {exc}. Push data/hw{n}.json manually before submitting.")
 url = f"https://jhu.nymo.finance/hw/{n}"
 print(f"sealed -> {public} (public) and {secret} (secret)\n\nPaste into hw{n}.tex header, then rebuild:\n")
 print(f"\\aireport{{{url}}}{{{crypto.encode_opening(opening)}}}{{{sealed.commitment.hex()}}}")

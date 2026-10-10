@@ -14,6 +14,8 @@ Paper first. Claude is an office-hours CA and a typist, never a solver. Rules in
 ## Study
 `/concept`, `/quiz`, `/exam-prep` — see `docs/study_plan.md`.
 
+Public repo: https://github.com/cortizm1/ai_alignment_algorithms (code, policy, and the sealed public records; never homework text).
+
 ## Transparency site (jhu.nymo.finance)
 `web/` is the FastHTML + MonsterUI app (no JavaScript). `transparency/` holds the Pedersen/ChaCha20 scheme.
 Per homework: `/transcribe` -> `tools/seal.py N` -> paste the printed line into the .tex header -> rebuild ->

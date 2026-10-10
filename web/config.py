@@ -15,4 +15,5 @@ PORT: int = int(os.environ.get("JHU_PORT", "8010"))
 PUBLIC_URL: str = os.environ.get("JHU_PUBLIC_URL", "https://jhu.nymo.finance").rstrip("/")
 #: Session-signing secret. The site keeps no sessions; this only stops FastHTML from writing .sesskey to disk.
 SECRET_KEY: str = os.environ.get("JHU_SECRET_KEY") or os.urandom(32).hex()
+REPO_URL: str = os.environ.get("JHU_REPO_URL", "https://github.com/cortizm1/ai_alignment_algorithms")
 COURSE: str = "601.433 / 601.633 Introduction to Algorithms · JHU · Fall 2026"

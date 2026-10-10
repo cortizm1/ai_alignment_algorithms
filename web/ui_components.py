@@ -152,7 +152,7 @@ def nav() -> Any:
 
 def page(*content: Any) -> Any:
     return Div(grain_defs(), nav(), *content,
-               P(f"A Nymo Production · {config.COURSE}", cls="footer"), cls="reel")
+               P(f"A Nymo Production · {config.COURSE} · ", A("source + commitments on GitHub", href=config.REPO_URL, style="color:var(--ink)"), cls="footer"), cls="reel")
 
 
 def error_card(message: str) -> Any:
