@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fasthtml.common import FastHTML, Response, Title, cookie
+from fasthtml.common import FastHTML, RedirectResponse, Response, Title
 
 from web import config, records, ui_components, verify
 
@@ -23,12 +23,10 @@ def create_app() -> Any:
     app = FastHTML(hdrs=ui_components.headers(), live=False, secret_key=config.SECRET_KEY)
 
     @app.route("/", methods=["get"])
-    def home(request, tour: int = 0) -> Any:
-        """Landing page. The four-step tour pops up on the first visit (cookie) or on ?tour=1."""
+    def home() -> Any:
+        """Landing page. The four-step tour pops up on every load; 'Got it!' closes it."""
         try:
-            first_visit = request.cookies.get("tour_seen") != "1"
-            body = Title("AI-usage transparency · 601.433"), ui_components.home_page(records.list_records(), show_tour=first_visit or bool(tour))
-            return (*body, cookie("tour_seen", "1", max_age=60 * 60 * 24 * 365, samesite="lax")) if first_visit else body
+            return Title("AI-usage transparency · 601.433"), ui_components.home_page(records.list_records(), show_tour=True)
         except Exception as exc:  # noqa: BLE001
             return ui_components.page(ui_components.error_card(str(exc)))
 
@@ -41,14 +39,8 @@ def create_app() -> Any:
 
     @app.route("/manifesto", methods=["get"])
     def manifesto() -> Any:
-        """Public one-pager, readable by anyone: inline PDF, download, SHA3-256 as a subscript."""
-        try:
-            pdf = records.manifesto_pdf()
-            if pdf is None:
-                return Title("Manifesto"), ui_components.page(ui_components.error_card("The manifesto is not published yet."))
-            return Title("Manifesto · 601.433"), ui_components.manifesto_page(pdf, records.get_record(0))
-        except Exception as exc:  # noqa: BLE001
-            return ui_components.page(ui_components.error_card(str(exc)))
+        """The manifesto lives in Reel 0."""
+        return RedirectResponse("/hw/0", status_code=303)
 
     @app.route("/manifesto.pdf", methods=["get"])
     def manifesto_file() -> Any:

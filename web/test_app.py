@@ -96,13 +96,10 @@ def test_policy_has_scheme_diagram(client):
     assert "PEDERSEN COMMITMENT" in r.text and "<svg" in r.text
 
 
-def test_tour_on_first_visit_then_hidden(client, sealed_hw):
+def test_tour_on_every_visit(client, sealed_hw):
     r = client.get("/")
-    assert "<dialog" in r.text and "How this works" in r.text and "tour_seen" in r.headers.get("set-cookie", "")
-    r2 = client.get("/", cookies={"tour_seen": "1"})
-    assert "<dialog" not in r2.text
-    r3 = client.get("/?tour=1", cookies={"tour_seen": "1"})
-    assert "<dialog" in r3.text
+    assert "<dialog" in r.text and "How this works" in r.text
+    assert "<dialog" in client.get("/").text
 
 
 def test_attachment_hash_caption(client, sealed_hw):
@@ -111,12 +108,11 @@ def test_attachment_hash_caption(client, sealed_hw):
     assert hashlib.sha3_256(b"%PDF-1.4 fake").hexdigest() in r.text
 
 
-def test_manifesto_public_with_hash(client, monkeypatch, tmp_path):
-    import hashlib
+def test_manifesto_redirects_to_reel_0_and_pdf_served(client, monkeypatch, tmp_path):
     f = tmp_path / "m.pdf"; f.write_bytes(b"%PDF-1.4 manifesto")
     monkeypatch.setattr(records.manifesto_pdf, "__defaults__", (f,))
-    r = client.get("/manifesto")
-    assert r.status_code == 200 and hashlib.sha3_256(b"%PDF-1.4 manifesto").hexdigest() in r.text and "Open the vault" not in r.text
+    r = client.get("/manifesto", follow_redirects=False)
+    assert r.status_code == 303 and r.headers["location"] == "/hw/0"
     raw = client.get("/manifesto.pdf")
     assert raw.content == b"%PDF-1.4 manifesto" and raw.headers["content-type"].startswith("application/pdf")
 

@@ -159,7 +159,7 @@ def intertitle(title: str, sub: str = "") -> Any:
 
 
 def nav() -> Any:
-    return Div(A("Home", href="/"), A("Manifesto", href="/manifesto"), A("Policy", href="/policy"), cls="nav", style="margin-bottom:1.5rem")
+    return Div(A("Home", href="/"), A("Policy", href="/policy"), cls="nav", style="margin-bottom:1.5rem")
 
 
 def page(*content: Any) -> Any:
@@ -197,7 +197,7 @@ def tour_dialog() -> Any:
             P("Four steps. That is the whole thing.", cls="meta"),
             Ol(*[Li(Span(str(i + 1), cls="num"), Span(step)) for i, step in enumerate(TOUR_STEPS)]),
             Form(Button("Got it!", cls="btn", type="submit", autofocus=True), " ",
-                 A("Read the manifesto \u2192", href="/manifesto", cls="meta", style="margin-left:.8rem"),
+                 A("Read the manifesto \u2192", href="/hw/0", cls="meta", style="margin-left:.8rem"),
                  method="dialog"),
             cls="tour-card",
         ),
@@ -205,7 +205,7 @@ def tour_dialog() -> Any:
     )
 
 
-def home_page(recs: list[dict[str, Any]], show_tour: bool = False) -> Any:
+def home_page(recs: list[dict[str, Any]], show_tour: bool = True) -> Any:
     rows = [
         Tr(
             Td(A("Reel 0 · Manifesto" if r["hw"] == 0 else f"Reel {r['hw']}", href=f"/hw/{r['hw']}")),
@@ -228,29 +228,12 @@ def home_page(recs: list[dict[str, Any]], show_tour: bool = False) -> Any:
               "into LaTeX word for word. It never solves. Each homework's session log and full transcript are "
               "sealed with a Pedersen commitment before the deadline and published encrypted. The opening is "
               "printed in the header of the submitted PDF, so the graders, and only they, can verify and read.", cls="memo"),
-            P(A("Manifesto →", href="/manifesto"), " · ", A("Policy and the cryptographic scheme →", href="/policy"), " · ", A("Show the four-step tour again", href="/?tour=1"), cls="meta"),
+            P(A("Manifesto: Reel 0 →", href="/hw/0"), " · ", A("Policy and the cryptographic scheme →", href="/policy"), cls="meta"),
             cls="card",
         ),
         H2("The ledger", cls="sub", style="margin-top:2.5rem"),
         Table(Thead(Tr(Th("Reel"), Th("Status"), Th("AI sessions"), Th("Sealed"), Th("Commitment"))), Tbody(*rows), cls="ledger")
         if rows else P("No reels yet.", cls="memo"),
-    )
-
-
-def manifesto_page(pdf: bytes, reel: dict[str, Any] | None = None) -> Any:
-    """Public document: inline viewer, download link, the file's SHA3-256 as a subscript, and a pointer to Reel 0."""
-    digest = hashlib.sha3_256(pdf).hexdigest()
-    return page(
-        intertitle("Manifesto", "Why I learn this way, on one page"),
-        P("This document is also sealed as ", A("Reel 0", href="/hw/0"), ", with its opening published on purpose, "
-          "so you can watch a commitment open and verify with your own hands.", cls="memo") if reel else None,
-        Div(
-            Object(P("Your browser does not display PDFs inline. ", A("Open the PDF", href="/manifesto.pdf"), cls="memo"),
-                   data="/manifesto.pdf", type="application/pdf", style="width:100%;height:85vh;border:3px solid var(--ink);border-radius:12px"),
-            P(Span("SHA3-256", cls="meta"), " ", Span(digest, cls="hex"), f" · {len(pdf):,} bytes · ",
-              A("download", href="/manifesto.pdf", download="manifesto_onepager.pdf", style="color:var(--ink)"), cls="subscript"),
-            cls="card",
-        ),
     )
 
 
