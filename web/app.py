@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fasthtml.common import FastHTML, Title
+from fasthtml.common import FastHTML, Response, Title
 
 from web import config, records, ui_components, verify
 
@@ -52,9 +52,22 @@ def create_app() -> Any:
             rec = records.get_record(n)
             if rec is None or not rec.get("sealed"):
                 return ui_components.verdict_partial(verify.Opened(False, "Nothing sealed for this homework yet."))
-            return ui_components.verdict_partial(verify.open_record(rec, opening))
+            return ui_components.verdict_partial(verify.open_record(rec, opening), n, opening)
         except Exception as exc:  # noqa: BLE001
             return ui_components.error_card(str(exc))
+
+    @app.route("/hw/{n}/attachment/{i}", methods=["post"])
+    def download_attachment(n: int, i: int, opening: str = "") -> Any:
+        """Decrypt one attachment and hand it to the browser as a file. Stateless: the opening rides in the POST."""
+        try:
+            rec = records.get_record(n)
+            att = verify.open_attachment(rec, opening, i) if rec else None
+            if att is None:
+                return Response("does not open", status_code=403, media_type="text/plain")
+            return Response(att.data, media_type=att.mime,
+                            headers={"Content-Disposition": f'attachment; filename="{att.name}"', "Cache-Control": "no-store"})
+        except Exception as exc:  # noqa: BLE001
+            return Response(str(exc), status_code=500, media_type="text/plain")
 
     return app
 

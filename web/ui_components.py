@@ -7,11 +7,12 @@ No JavaScript anywhere; the only interaction is one HTMX form post.
 
 from __future__ import annotations
 
+import base64
 from typing import Any
 
 import markdown as md_lib
 from fasthtml.common import (
-    H1, H2, H3, A, Button, Details, Div, Form, Input, Label, Link, Meta, NotStr, P, Span, Style, Summary,
+    H1, H2, H3, A, Button, Details, Div, Form, Hidden, Input, Label, Link, Meta, NotStr, Object, P, Span, Style, Summary,
     Table, Tbody, Td, Th, Thead, Tr, ft_hx,
 )
 from fasthtml.svg import Circle, Defs, Ellipse, FeTurbulence, Filter, G, Line, Path, Pattern, Rect, Svg, Text
@@ -233,11 +234,31 @@ def hw_page(rec: dict[str, Any]) -> Any:
     return page(head, body)
 
 
-def verdict_partial(opened: Any) -> Any:
+def _download_form(n: int, i: int, opening: str, label: str) -> Any:
+    """Plain POST form: the opening travels with the request, nothing is kept server-side."""
+    return Form(Hidden(name="opening", value=opening), Button(label, cls="btn", type="submit"),
+                method="post", action=f"/hw/{n}/attachment/{i}", style="display:inline-block;margin:.4rem .4rem .4rem 0")
+
+
+def attachment_view(n: int, i: int, att: Any, opening: str) -> Any:
+    """Markdown inline; PDF inline viewer + download; anything else download only."""
+    if att.mime.startswith("text/markdown"):
+        return Details(Summary(att.name), md(att.data.decode(errors="replace")), cls="transcript")
+    if att.mime == "application/pdf":
+        data_url = "data:application/pdf;base64," + base64.b64encode(att.data).decode()
+        return Div(
+            P(Span(att.name, cls="meta"), " ", _download_form(n, i, opening, "Download PDF"), cls="memo"),
+            Object(P("Your browser does not display PDFs inline; use the download button.", cls="memo"),
+                   data=data_url, type="application/pdf", style="width:100%;height:80vh;border:3px solid var(--ink);border-radius:12px"),
+        )
+    return P(Span(att.name, cls="meta"), " ", _download_form(n, i, opening, f"Download ({att.mime})"), cls="memo")
+
+
+def verdict_partial(opened: Any, n: int = 0, opening: str = "") -> Any:
     """HTMX partial rendered into #verdict."""
     if not opened.ok:
         return Div(stamp("DOES NOT OPEN", ok=False), P(opened.message, cls="memo"))
     parts = [stamp("COMMITMENT VERIFIED", ok=True), P(opened.message, cls="memo"), wobbly_rule(), md(opened.report)]
-    if opened.transcript:
-        parts.append(Details(Summary("Full session transcript (redacted of credentials)"), md(opened.transcript), cls="transcript"))
+    for i, att in enumerate(opened.attachments):
+        parts.append(attachment_view(n, i, att, opening))
     return Div(*parts)

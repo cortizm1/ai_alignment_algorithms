@@ -21,6 +21,14 @@ def list_records(data_dir: Path = config.DATA_DIR) -> list[dict[str, Any]]:
     return out
 
 
+def attachments_of(rec: dict[str, Any]) -> list[dict[str, Any]]:
+    """Attachment list; a legacy single ``transcript`` entry is folded in as markdown."""
+    atts = list(rec.get("attachments") or [])
+    if rec.get("transcript"):
+        atts.insert(0, {"name": "transcript.md", "mime": "text/markdown", **rec["transcript"]})
+    return atts
+
+
 def get_record(n: int, data_dir: Path = config.DATA_DIR) -> dict[str, Any] | None:
     """One homework record or None."""
     f = data_dir / f"hw{n}.json"

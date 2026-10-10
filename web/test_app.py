@@ -19,7 +19,9 @@ def sealed_hw(data_dir):
     report = b"# HW4 AI-usage log\n\n| when | mode | what |\n|---|---|---|\n| 2026-10-14 | critique | attempt1 |\n"
     sealed, opening = crypto.seal(report)
     att = crypto.seal_attachment(b"### Carlos\n\nhello", sealed.commitment, opening)
-    rec = {"status": "submitted", "sessions": 1, "sealed_at": "2026-10-15T20:00", "sealed": crypto.encode_sealed(sealed), "transcript": att}
+    pdf = {"name": "hw4.pdf", "mime": "application/pdf", **crypto.seal_attachment(b"%PDF-1.4 fake", sealed.commitment, opening)}
+    rec = {"status": "submitted", "sessions": 1, "sealed_at": "2026-10-15T20:00", "sealed": crypto.encode_sealed(sealed),
+           "transcript": att, "attachments": [pdf]}
     (data_dir / "hw4.json").write_text(json.dumps(rec))
     (data_dir / "hw5.json").write_text(json.dumps({"status": "live", "sessions": 0}))
     return crypto.encode_opening(opening)
@@ -59,6 +61,19 @@ def test_missing_hw_is_404ish_card(client):
 def test_open_with_right_opening(client, sealed_hw):
     r = client.post("/hw/4/open", data={"opening": sealed_hw})
     assert "COMMITMENT VERIFIED" in r.text and "critique" in r.text and "transcript" in r.text.lower()
+    assert "data:application/pdf;base64," in r.text and 'action="/hw/4/attachment/1"' in r.text
+
+
+def test_attachment_download_with_right_opening(client, sealed_hw):
+    r = client.post("/hw/4/attachment/1", data={"opening": sealed_hw})
+    assert r.status_code == 200 and r.headers["content-type"].startswith("application/pdf")
+    assert r.content == b"%PDF-1.4 fake" and 'filename="hw4.pdf"' in r.headers["content-disposition"]
+
+
+def test_attachment_download_with_wrong_opening(client, sealed_hw):
+    bad = "00" * 64 + "." + sealed_hw.split(".")[1]
+    assert client.post("/hw/4/attachment/1", data={"opening": bad}).status_code == 403
+    assert client.post("/hw/4/attachment/9", data={"opening": sealed_hw}).status_code == 403
 
 
 def test_open_with_wrong_opening(client, sealed_hw):
