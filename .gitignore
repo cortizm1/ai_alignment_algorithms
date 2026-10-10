@@ -47,3 +47,4 @@ hw/*/postmortem.md
 vps_setup.txt
 vps*.txt
 .sesskey
+__pycache__/
