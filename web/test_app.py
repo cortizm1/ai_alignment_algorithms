@@ -74,3 +74,8 @@ def test_open_malformed(client, sealed_hw):
 def test_no_javascript_files_in_web():
     import pathlib
     assert not list(pathlib.Path(__file__).parent.glob("**/*.js"))
+
+
+def test_policy_has_scheme_diagram(client):
+    r = client.get("/policy")
+    assert "PEDERSEN COMMITMENT" in r.text and "<svg" in r.text

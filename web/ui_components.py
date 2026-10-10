@@ -18,6 +18,7 @@ from fasthtml.svg import Circle, Defs, Ellipse, FeTurbulence, Filter, G, Line, P
 from monsterui.all import Theme
 
 from web import config
+from web.diagram import scheme_diagram
 
 INK = "#111111"
 PAPER = "#f2f2f2"
@@ -46,6 +47,7 @@ table.ledger a {{ color: var(--ink); font-weight: 700; }}
 .btn:hover {{ background: var(--paper); color: var(--ink); }}
 input.opening {{ width: 100%; font-family: var(--type); font-size: .95rem; border: 3px solid var(--ink); border-radius: 10px; padding: .6rem .8rem; background: var(--paper); color: var(--ink); }}
 .memo {{ font-family: var(--type); line-height: 1.5; }}
+.memo ol {{ list-style: decimal; padding-left: 1.6rem; }} .memo ol li {{ margin: .35rem 0; }} .memo p {{ margin: .6rem 0; }}
 .memo h1, .memo h2, .memo h3 {{ font-family: var(--condensed); letter-spacing: .1em; text-transform: uppercase; }}
 .memo table {{ border-collapse: collapse; width: 100%; font-size: .9rem; }}
 .memo td, .memo th {{ border: 2px solid var(--ink); padding: .35rem .5rem; vertical-align: top; text-align: left; }}
@@ -197,7 +199,12 @@ def home_page(recs: list[dict[str, Any]]) -> Any:
 
 
 def policy_page(markdown_text: str) -> Any:
-    return page(intertitle("The policy", "What the tool may and may not do"), Div(md(markdown_text), cls="card"))
+    return page(
+        intertitle("The policy", "What the tool may and may not do"),
+        Div(md(markdown_text), cls="card"),
+        H2("The scheme, as a map", cls="sub", style="margin-top:2.5rem"),
+        Div(scheme_diagram(), cls="card", style="padding:.5rem"),
+    )
 
 
 def hw_page(rec: dict[str, Any]) -> Any:
