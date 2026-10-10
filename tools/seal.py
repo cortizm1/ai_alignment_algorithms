@@ -11,6 +11,7 @@ Prints : the \\aireport line for the LaTeX header. Then run tools/deploy_server.
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import json
 import pathlib
 import subprocess
@@ -36,11 +37,11 @@ transcript_md = "\n\n---\n\n".join(t.read_text() for t in transcripts)
 
 report = log.read_bytes()
 sealed, opening = crypto.seal(report)
-attachments = [{"name": "transcripts.md", "mime": "text/markdown",
+attachments = [{"name": "transcripts.md", "mime": "text/markdown", "sha3": hashlib.sha3_256(transcript_md.encode()).hexdigest(),
                 **crypto.seal_attachment(transcript_md.encode(), sealed.commitment, opening)}]
 pdf = hwdir / f"hw{n}.pdf"
 if with_pdf and pdf.exists():
-    attachments.append({"name": pdf.name, "mime": "application/pdf",
+    attachments.append({"name": pdf.name, "mime": "application/pdf", "sha3": hashlib.sha3_256(pdf.read_bytes()).hexdigest(),
                         **crypto.seal_attachment(pdf.read_bytes(), sealed.commitment, opening)})
 now = dt.datetime.now().astimezone().isoformat(timespec="minutes")
 status = (hwdir / "STATUS").read_text().strip() if (hwdir / "STATUS").exists() else "unknown"

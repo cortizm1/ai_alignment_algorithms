@@ -46,7 +46,7 @@ def create_app() -> Any:
             pdf = records.manifesto_pdf()
             if pdf is None:
                 return Title("Manifesto"), ui_components.page(ui_components.error_card("The manifesto is not published yet."))
-            return Title("Manifesto · 601.433"), ui_components.manifesto_page(pdf)
+            return Title("Manifesto · 601.433"), ui_components.manifesto_page(pdf, records.get_record(0))
         except Exception as exc:  # noqa: BLE001
             return ui_components.page(ui_components.error_card(str(exc)))
 

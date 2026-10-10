@@ -208,7 +208,7 @@ def tour_dialog() -> Any:
 def home_page(recs: list[dict[str, Any]], show_tour: bool = False) -> Any:
     rows = [
         Tr(
-            Td(A(f"Reel {r['hw']}", href=f"/hw/{r['hw']}")),
+            Td(A("Reel 0 · Manifesto" if r["hw"] == 0 else f"Reel {r['hw']}", href=f"/hw/{r['hw']}")),
             Td(Span(r.get("status", "unknown"), cls="badge")),
             Td(str(r.get("sessions", 0))),
             Td(r.get("sealed_at", "")[:16].replace("T", " ") or "not yet"),
@@ -237,11 +237,13 @@ def home_page(recs: list[dict[str, Any]], show_tour: bool = False) -> Any:
     )
 
 
-def manifesto_page(pdf: bytes) -> Any:
-    """Public document: inline viewer, download link, and the file's SHA3-256 as a subscript."""
+def manifesto_page(pdf: bytes, reel: dict[str, Any] | None = None) -> Any:
+    """Public document: inline viewer, download link, the file's SHA3-256 as a subscript, and a pointer to Reel 0."""
     digest = hashlib.sha3_256(pdf).hexdigest()
     return page(
         intertitle("Manifesto", "Why I learn this way, on one page"),
+        P("This document is also sealed as ", A("Reel 0", href="/hw/0"), ", with its opening published on purpose, "
+          "so you can watch a commitment open and verify with your own hands.", cls="memo") if reel else None,
         Div(
             Object(P("Your browser does not display PDFs inline. ", A("Open the PDF", href="/manifesto.pdf"), cls="memo"),
                    data="/manifesto.pdf", type="application/pdf", style="width:100%;height:85vh;border:3px solid var(--ink);border-radius:12px"),
@@ -264,20 +266,27 @@ def policy_page(markdown_text: str) -> Any:
 def hw_page(rec: dict[str, Any]) -> Any:
     n = rec["hw"]
     sealed = rec.get("sealed")
-    head = intertitle(f"Reel {n}", f"Homework {n} · {rec.get('status', 'unknown')}")
+    head = intertitle("Reel 0", "The manifesto · try opening a commitment") if n == 0 else intertitle(f"Reel {n}", f"Homework {n} · {rec.get('status', 'unknown')}")
     if not sealed:
         body = Div(P(f"Not sealed yet. AI sessions logged so far: {rec.get('sessions', 0)}. "
                      "The log is sealed and published when the homework is submitted.", cls="memo"), cls="card")
         return page(head, body)
+    public_opening = rec.get("public_opening", "")
+    files = [P(Span(a.get("name", "attachment"), cls="meta"), " ",
+               Span(a["sha3"], cls="hex") if a.get("sha3") else "", cls="subscript")
+             for a in (rec.get("attachments") or [])]
     body = Div(
         P(Span("Sealed", cls="meta"), " ", rec.get("sealed_at", "")[:16].replace("T", " "), cls="memo"),
         P(Span("Pedersen commitment (ristretto255)", cls="meta"), cls="memo"),
         Div(sealed["commitment"], cls="hex"),
-        P(Span("Ciphertext (ChaCha20-Poly1305)", cls="meta"), cls="memo", style="margin-top:1rem"),
-        Div(sealed["ciphertext"], cls="static"),
+        P(Span("Sealed files (SHA3-256 of each plaintext)", cls="meta"), cls="memo", style="margin-top:1rem") if files else None,
+        *files,
+        P("This reel's opening is public on purpose, so you can try the verification yourself. It is already filled in: press the button, "
+          "then change any character of it and press again.", cls="memo", style="margin-top:1rem") if public_opening else None,
         Form(
-            Label("Opening, from the header of the submitted PDF", cls="meta", **{"for": "opening"}),
-            Input(id="opening", name="opening", cls="opening", placeholder="<64 hex>.<64 hex>", autocomplete="off", spellcheck="false"),
+            Label("Opening" + ("" if public_opening else ", from the header of the submitted PDF"), cls="meta", **{"for": "opening"}),
+            Input(id="opening", name="opening", cls="opening", placeholder="<64 hex>.<64 hex>", autocomplete="off", spellcheck="false",
+                  value=public_opening),
             Button("Open the vault", cls="btn", type="submit", style="margin-top:.8rem"),
             hx_post=f"/hw/{n}/open", hx_target="#verdict", hx_swap="innerHTML", style="margin-top:1.4rem",
         ),

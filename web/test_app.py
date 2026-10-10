@@ -119,3 +119,14 @@ def test_manifesto_public_with_hash(client, monkeypatch, tmp_path):
     assert r.status_code == 200 and hashlib.sha3_256(b"%PDF-1.4 manifesto").hexdigest() in r.text and "Open the vault" not in r.text
     raw = client.get("/manifesto.pdf")
     assert raw.content == b"%PDF-1.4 manifesto" and raw.headers["content-type"].startswith("application/pdf")
+
+
+def test_public_opening_prefilled_and_no_ciphertext_on_page(client, data_dir, sealed_hw):
+    rec = json.loads((data_dir / "hw4.json").read_text()); rec["public_opening"] = sealed_hw
+    rec["attachments"][0]["sha3"] = "ab" * 32
+    (data_dir / "hw0.json").write_text(json.dumps(rec))
+    r = client.get("/hw/0")
+    assert f'value="{sealed_hw}"' in r.text and "ab" * 32 in r.text and "public on purpose" in r.text
+    assert rec["sealed"]["ciphertext"][:40] not in r.text
+    r4 = client.get("/hw/4")
+    assert rec["sealed"]["ciphertext"][:40] not in r4.text and 'value=""' in r4.text or "value" not in r4.text.split("opening")[1][:80]
