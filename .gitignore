@@ -46,3 +46,4 @@ hw/*/solutions.pdf
 hw/*/postmortem.md
 vps_setup.txt
 vps*.txt
+.sesskey
