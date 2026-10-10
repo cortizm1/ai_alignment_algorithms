@@ -48,3 +48,4 @@ vps_setup.txt
 vps*.txt
 .sesskey
 __pycache__/
+playground/*.ipynb
