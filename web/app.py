@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fasthtml.common import FastHTML, Response, Title
+from fasthtml.common import FastHTML, Response, Title, cookie
 
 from web import config, records, ui_components, verify
 
@@ -23,9 +23,12 @@ def create_app() -> Any:
     app = FastHTML(hdrs=ui_components.headers(), live=False, secret_key=config.SECRET_KEY)
 
     @app.route("/", methods=["get"])
-    def home() -> Any:
+    def home(request, tour: int = 0) -> Any:
+        """Landing page. The four-step tour pops up on the first visit (cookie) or on ?tour=1."""
         try:
-            return Title("AI-usage transparency · 601.433"), ui_components.home_page(records.list_records())
+            first_visit = request.cookies.get("tour_seen") != "1"
+            body = Title("AI-usage transparency · 601.433"), ui_components.home_page(records.list_records(), show_tour=first_visit or bool(tour))
+            return (*body, cookie("tour_seen", "1", max_age=60 * 60 * 24 * 365, samesite="lax")) if first_visit else body
         except Exception as exc:  # noqa: BLE001
             return ui_components.page(ui_components.error_card(str(exc)))
 

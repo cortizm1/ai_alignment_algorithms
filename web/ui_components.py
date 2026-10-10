@@ -8,11 +8,12 @@ No JavaScript anywhere; the only interaction is one HTMX form post.
 from __future__ import annotations
 
 import base64
+import hashlib
 from typing import Any
 
 import markdown as md_lib
 from fasthtml.common import (
-    H1, H2, H3, A, Button, Details, Div, Form, Hidden, Input, Label, Link, Meta, NotStr, Object, P, Span, Style, Summary,
+    H1, H2, H3, A, Button, Details, Dialog, Div, Form, Hidden, Input, Label, Link, Meta, NotStr, Object, Ol, Li, P, Span, Style, Summary,
     Table, Tbody, Td, Th, Thead, Tr, ft_hx,
 )
 from fasthtml.svg import Circle, Defs, Ellipse, FeTurbulence, Filter, G, Line, Path, Pattern, Rect, Svg, Text
@@ -54,7 +55,15 @@ input.opening {{ width: 100%; font-family: var(--type); font-size: .95rem; borde
 .memo td, .memo th {{ border: 2px solid var(--ink); padding: .35rem .5rem; vertical-align: top; text-align: left; }}
 .memo pre {{ white-space: pre-wrap; border-left: 4px solid var(--ink); padding-left: .8rem; font-size: .85rem; }}
 details.transcript summary {{ cursor: pointer; font-family: var(--condensed); letter-spacing: .12em; text-transform: uppercase; font-size: 1.1rem; }}
+dialog.tour {{ position: fixed; inset: 0; margin: auto; z-index: 1000; width: min(560px, 92vw); height: fit-content; max-height: 92vh; overflow: visible; background: transparent; border: none; padding: 0; color: var(--ink); font-family: var(--type); }}
+dialog.tour::before {{ content: ''; position: fixed; inset: -100vh -100vw; background: rgba(17,17,17,.6); z-index: -1; }}
+.tour-card {{ position: relative; border: 4px solid var(--ink); border-radius: 18px; background: var(--paper); padding: 1.5rem 1.75rem; box-shadow: 10px 10px 0 var(--ink); max-height: 92vh; overflow: auto; }}
+dialog.tour h2 {{ font-family: var(--display); font-size: 2rem; margin: 0 0 .5rem; text-transform: uppercase; }}
+dialog.tour ol {{ list-style: none; padding: 0; margin: 1rem 0; }}
+dialog.tour li {{ display: flex; gap: .9rem; align-items: flex-start; margin: .7rem 0; font-size: 1.05rem; line-height: 1.4; }}
+dialog.tour .num {{ flex: 0 0 2.2rem; height: 2.2rem; border: 3px solid var(--ink); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-family: var(--condensed); font-size: 1.4rem; }}
 .stamp {{ display:inline-block; transform: rotate(-6deg); margin: .5rem 0; }}
+.footer a {{ margin-left: .5rem; }}
 .footer {{ margin-top: 3rem; font-family: var(--condensed); letter-spacing: .14em; text-transform: uppercase; font-size: .8rem; text-align: center; }}
 @keyframes blink {{ 0%, 92%, 100% {{ transform: scaleY(1); }} 96% {{ transform: scaleY(.08); }} }}
 .eye {{ transform-origin: center; animation: blink 5.5s infinite; }}
@@ -153,7 +162,8 @@ def nav() -> Any:
 
 def page(*content: Any) -> Any:
     return Div(grain_defs(), nav(), *content,
-               P(f"A Nymo Production · {config.COURSE} · ", A("source + commitments on GitHub", href=config.REPO_URL, style="color:var(--ink)"), cls="footer"), cls="reel")
+               P(f"A Nymo Production · {config.COURSE}", cls="footer"),
+               P(A("source + commitments on GitHub", href=config.REPO_URL, style="color:var(--ink)"), cls="footer", style="margin-top:.4rem"), cls="reel")
 
 
 def error_card(message: str) -> Any:
@@ -168,7 +178,32 @@ def md(text: str) -> Any:
 # ---- pages ----------------------------------------------------------------------
 
 
-def home_page(recs: list[dict[str, Any]]) -> Any:
+TOUR_STEPS: list[str] = [
+    "I do my homework with a pencil. All of it.",
+    "A robot helper may look at my finished page and say \u201cthis part is missing.\u201d It never tells me the answer.",
+    "The robot writes a diary of what it did. Before homework is due, I lock the diary in a box and show everyone the locked box.",
+    "My teacher gets the key, printed on my homework. Only the teacher can open the box, and the box proves nobody swapped the diary.",
+]
+
+
+def tour_dialog() -> Any:
+    """First-visit tutorial. A native <dialog open>; the close button is a method=dialog form, so no JavaScript."""
+    return Dialog(
+        Div(
+            Div(mascot(110), style="float:right;margin:-.5rem -.5rem 0 .5rem"),
+            H2("How this works"),
+            P("Four steps. That is the whole thing.", cls="meta"),
+            Ol(*[Li(Span(str(i + 1), cls="num"), Span(step)) for i, step in enumerate(TOUR_STEPS)]),
+            Form(Button("Got it!", cls="btn", type="submit", autofocus=True), " ",
+                 A("Show me a locked box \u2192", href="/hw/0", cls="meta", style="margin-left:.8rem"),
+                 method="dialog"),
+            cls="tour-card",
+        ),
+        cls="tour", open=True, aria_label="How this site works",
+    )
+
+
+def home_page(recs: list[dict[str, Any]], show_tour: bool = False) -> Any:
     rows = [
         Tr(
             Td(A(f"Reel {r['hw']}", href=f"/hw/{r['hw']}")),
@@ -180,6 +215,7 @@ def home_page(recs: list[dict[str, Any]]) -> Any:
         for r in recs
     ]
     return page(
+        tour_dialog() if show_tour else None,
         Div(
             Div(
                 Div(intertitle("AI-usage transparency", "Every homework, every session, on the record"), style="flex:1 1 60%"),
@@ -190,7 +226,7 @@ def home_page(recs: list[dict[str, Any]]) -> Any:
               "into LaTeX word for word. It never solves. Each homework's session log and full transcript are "
               "sealed with a Pedersen commitment before the deadline and published encrypted. The opening is "
               "printed in the header of the submitted PDF, so the graders, and only they, can verify and read.", cls="memo"),
-            P(A("Read the full policy and the cryptographic scheme →", href="/policy"), cls="meta"),
+            P(A("Read the full policy and the cryptographic scheme →", href="/policy"), " · ", A("Show the four-step tour again", href="/?tour=1"), cls="meta"),
             cls="card",
         ),
         H2("The ledger", cls="sub", style="margin-top:2.5rem"),
@@ -240,18 +276,26 @@ def _download_form(n: int, i: int, opening: str, label: str) -> Any:
                 method="post", action=f"/hw/{n}/attachment/{i}", style="display:inline-block;margin:.4rem .4rem .4rem 0")
 
 
+def file_caption(att: Any) -> Any:
+    """Commentary line under a file: its SHA3-256, so a reader can match a downloaded copy to what was opened."""
+    digest = hashlib.sha3_256(att.data).hexdigest()
+    return P(Span("SHA3-256 of this file", cls="meta"), " ", Span(digest, cls="hex", style="display:inline;padding:.1rem .3rem"),
+             f" · {len(att.data):,} bytes · decrypted in this response, not stored", cls="memo", style="font-size:.85rem")
+
+
 def attachment_view(n: int, i: int, att: Any, opening: str) -> Any:
-    """Markdown inline; PDF inline viewer + download; anything else download only."""
+    """Markdown inline; PDF inline viewer + download; anything else download only. Every file gets a hash caption."""
     if att.mime.startswith("text/markdown"):
-        return Details(Summary(att.name), md(att.data.decode(errors="replace")), cls="transcript")
+        return Div(Details(Summary(att.name), md(att.data.decode(errors="replace")), cls="transcript"), file_caption(att))
     if att.mime == "application/pdf":
         data_url = "data:application/pdf;base64," + base64.b64encode(att.data).decode()
         return Div(
             P(Span(att.name, cls="meta"), " ", _download_form(n, i, opening, "Download PDF"), cls="memo"),
             Object(P("Your browser does not display PDFs inline; use the download button.", cls="memo"),
                    data=data_url, type="application/pdf", style="width:100%;height:80vh;border:3px solid var(--ink);border-radius:12px"),
+            file_caption(att),
         )
-    return P(Span(att.name, cls="meta"), " ", _download_form(n, i, opening, f"Download ({att.mime})"), cls="memo")
+    return Div(P(Span(att.name, cls="meta"), " ", _download_form(n, i, opening, f"Download ({att.mime})"), cls="memo"), file_caption(att))
 
 
 def verdict_partial(opened: Any, n: int = 0, opening: str = "") -> Any:

@@ -1,0 +1,41 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{setspace,enumitem,xcolor,hyperref}
+\usepackage{mathpazo}
+\hypersetup{colorlinks=true,urlcolor=black!70,linkcolor=black}
+\pagestyle{empty}
+\setlength{\parskip}{0.35em}\setlength{\parindent}{0pt}
+\begin{document}
+\begin{center}
+{\LARGE\bfseries Learning Algorithms Without Outsourcing the Learning}\\[2pt]
+{\large A statement on how I use, and refuse to use, AI in 601.433}\\[4pt]
+{\small Carlos Ortiz Montes de Oca \quad$\cdot$\quad Johns Hopkins University, Fall 2026 \quad$\cdot$\quad \href{https://jhu.nymo.finance}{jhu.nymo.finance}}
+\end{center}
+\vspace{2pt}\hrule\vspace{8pt}
+
+\textbf{Where I start.} My training is in applied machine learning and software engineering, not in the theory of algorithms. I build agent systems for a living. I do not yet write proofs fluently. This course is the first place where that gap has a grade attached to it, and the gap is real: a 40 on the first midterm, and homework scores that say the same thing.
+
+\textbf{What I noticed before I used any AI.} For several weeks I studied with nothing but the textbook, the lecture notes, and paper. The gains were not confined to this course. I read other technical material more easily. I even played the piano better. Learning to think recursively and rigorously, slowly and by hand, is a transferable skill, and it is formed precisely by the friction that a fast tool removes.
+
+\textbf{The tension.} The problems are hard, the semester is finite, and the ambient assumption, at office hours and among classmates, is that everyone has a model open in another tab. I am worried about something more specific than cheating: the sense-making loop between a student and a problem becoming a loop between a student and a machine that answers at a latency too low to build anything durable in the student. I do not want to come out of this course with a modified version of the skill, the version that only works with the tool switched on.
+
+\textbf{My contract, in one line.} \emph{The tool may help me understand; it may never do the understanding for me.}
+
+\begin{enumerate}[leftmargin=1.4em,itemsep=1pt,topsep=2pt]
+  \item Every problem is attempted by hand, on paper, before any AI session touches it.
+  \item The tool may read my finished draft and name what is missing: an unjustified step, a missing case, a quantifier used backwards. It may not say how to fix it. I go back to paper.
+  \item The tool may teach concepts from the lecture notes and the textbook, with examples that are not homework problems, and it may quiz me. It will not answer ``so for problem 2(b)\ldots''.
+  \item The tool types my handwritten pages into \LaTeX\ word for word. The mathematics is not touched; anything illegible is flagged in red for me to resolve by hand.
+  \item Web search is disabled inside the tool. It cannot look anything up for me.
+  \item Once a homework is graded and the official solutions are released, the restrictions lift and I use the tool to compare my work with the solutions and extract lessons.
+\end{enumerate}
+
+\textbf{Accountability by construction.} Promises are cheap, so the harness that enforces the rules above also keeps a log of every session: the mode used, the attempt number, counts of gaps named, anything refused. Before each deadline the log and the full transcripts are frozen and committed with a Pedersen commitment over ristretto255; the commitment is published on \href{https://jhu.nymo.finance}{jhu.nymo.finance} and in a public Git repository, so its time of existence is attested by a third party. The contents are published only as ChaCha20-Poly1305 ciphertext, because transcripts quote problem statements and my own attempts, which the course forbids publishing. The opening is printed in the header of the submitted PDF. Whoever grades the homework, and only they, can read exactly what happened and verify that nothing was altered after the deadline.
+
+\textbf{What this does not prove.} It does not prove I am honest. It proves that what I claim about a homework was fixed before the deadline and that the graders can inspect it in full. The rest rests on the same thing it always has.
+
+\textbf{Why bother.} Because I expect the question ``how did you use AI on this?'' to be asked of every student soon, and ``here is the sealed record, here is the key'' is a better answer than ``trust me.'' And because I would like to finish this course able to design an algorithm on a blank page, with nothing else open.
+
+\vspace{4pt}\hrule\vspace{4pt}
+{\footnotesize Source text and this document's build live in the public repository linked from the site. This one-pager was condensed, at my request and under my review, from my own longer manifesto.}
+\end{document}

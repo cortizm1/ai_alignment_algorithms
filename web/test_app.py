@@ -94,3 +94,18 @@ def test_no_javascript_files_in_web():
 def test_policy_has_scheme_diagram(client):
     r = client.get("/policy")
     assert "PEDERSEN COMMITMENT" in r.text and "<svg" in r.text
+
+
+def test_tour_on_first_visit_then_hidden(client, sealed_hw):
+    r = client.get("/")
+    assert "<dialog" in r.text and "How this works" in r.text and "tour_seen" in r.headers.get("set-cookie", "")
+    r2 = client.get("/", cookies={"tour_seen": "1"})
+    assert "<dialog" not in r2.text
+    r3 = client.get("/?tour=1", cookies={"tour_seen": "1"})
+    assert "<dialog" in r3.text
+
+
+def test_attachment_hash_caption(client, sealed_hw):
+    import hashlib
+    r = client.post("/hw/4/open", data={"opening": sealed_hw})
+    assert hashlib.sha3_256(b"%PDF-1.4 fake").hexdigest() in r.text
