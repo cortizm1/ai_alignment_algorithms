@@ -1,5 +1,9 @@
 # Transparency site deployment — jhu.nymo.finance
 
+STATUS 2026-10-10: LIVE. nginx 1.18 (TLS via certbot) -> Anubis v1.28.1 (127.0.0.1:8923) -> uvicorn jhu-web.service (127.0.0.1:8010, user jhu).
+Config lives in `deploy/`; `tools/deploy_server.sh` syncs it. Anubis signing key is server-only (/etc/anubis/jhu.key).
+
+
 ## Pieces
 - Static site built by `tools/publish.py` into `site/` (index + hwN.html; encrypted blobs inline).
 - Served by nginx (or whatever already fronts nymo.finance) behind Anubis.

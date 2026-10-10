@@ -14,6 +14,12 @@ Paper first. Claude is an office-hours CA and a typist, never a solver. Rules in
 ## Study
 `/concept`, `/quiz`, `/exam-prep` — see `docs/study_plan.md`.
 
+## Transparency site (jhu.nymo.finance)
+`web/` is the FastHTML + MonsterUI app (no JavaScript). `transparency/` holds the Pedersen/ChaCha20 scheme.
+Per homework: `/transcribe` -> `tools/seal.py N` -> paste the printed line into the .tex header -> rebuild ->
+`tools/deploy_server.sh data` (publishes the commitment) -> submit on Gradescope.
+Server: nginx (TLS) -> Anubis -> uvicorn :8010, config in `deploy/`, sync with `tools/deploy_server.sh config|app|data|status`.
+
 ## Setup still pending
 `sudo apt install texlive-science latexmk poppler-utils` (pseudocode packages, auto-rebuild, pdftotext).
 Everything else already compiles: `tools/build.sh hw/hw4/hw4.tex`.

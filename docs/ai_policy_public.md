@@ -21,12 +21,17 @@ Each homework page below holds the per-session log the tool is required to appen
 Entries record the mode, the attempt number, and counts. They never contain problem text,
 my claims, or any math, because publishing solutions is itself forbidden (syllabus §4).
 
-The logs are published encrypted, commitment-style. At submission time the log is frozen,
-its SHA-256 is published here and printed in the header of the submitted PDF together with
-the decryption key. Only someone holding the PDF (the graders) can read the report, and
-the published hash proves the report was fixed before the deadline and not edited after.
-Cipher: AES-256-GCM, key derived from the printed passphrase with PBKDF2-SHA256. Decryption
-happens in your browser; nothing is sent anywhere. The full session transcripts (every message, every tool call, the
-model's reasoning) are exported, redacted of credentials, and published under the same
-encryption and the same opening as the report. They are never public in plaintext because
-they quote problem statements and my own attempts, which the syllabus forbids publishing.
+The logs are published encrypted, commitment-style. At submission time the log is frozen and
+committed with a Pedersen commitment over ristretto255: C = m·G + r·H, where m is the SHA3-256
+of the report and r a random blinding factor. C is published here before the deadline. The
+report itself is published encrypted with ChaCha20-Poly1305 under a fresh 256-bit key, with C
+as associated data. The opening (key and blinding factor) is printed in the header of the
+submitted PDF, so only someone holding the submission can read the report, and anyone can check
+that what they read is exactly what was committed to before the deadline. Pedersen rather than a
+bare hash because the log is short and predictable: a hash alone would not hide it.
+
+The full session transcripts (every message, every tool call, the model's reasoning) are
+exported, redacted of credentials, and published as an attachment encrypted under the same key.
+They are never public in plaintext because they quote problem statements and my own attempts,
+which the syllabus forbids publishing. The instructors can request the transcripts in plaintext
+at any time.
