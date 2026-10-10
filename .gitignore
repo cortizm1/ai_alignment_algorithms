@@ -44,3 +44,5 @@ hw/*/attempts/
 hw/*/seal.json
 hw/*/solutions.pdf
 hw/*/postmortem.md
+vps_setup.txt
+vps*.txt

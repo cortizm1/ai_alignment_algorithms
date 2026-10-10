@@ -134,3 +134,24 @@ def decode_sealed(record: dict[str, str]) -> Sealed:
         bytes.fromhex(record["nonce"]),
         bytes.fromhex(record["ciphertext"]),
     )
+
+
+# ---- attachments (e.g. the transcript): same key, bound to the commitment ---------
+
+
+def seal_attachment(data: bytes, commitment: bytes, opening: Opening) -> dict[str, str]:
+    """Encrypt an extra blob under the report's key, with the commitment as associated data.
+    Not part of the commitment itself; its integrity is bound to the opening + commitment pair."""
+    nonce = os.urandom(NONCE_BYTES)
+    ct = sodium.crypto_aead_chacha20poly1305_ietf_encrypt(data, commitment, nonce, opening.key)
+    return {"nonce": nonce.hex(), "ciphertext": ct.hex()}
+
+
+def open_attachment(record: dict[str, str], commitment: bytes, opening: Opening) -> bytes:
+    """Inverse of seal_attachment. Raises ValueError on wrong key or tampering."""
+    try:
+        return sodium.crypto_aead_chacha20poly1305_ietf_decrypt(
+            bytes.fromhex(record["ciphertext"]), commitment, bytes.fromhex(record["nonce"]), opening.key
+        )
+    except Exception as exc:
+        raise ValueError("attachment decryption failed") from exc

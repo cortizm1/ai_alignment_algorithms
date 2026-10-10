@@ -1,7 +1,7 @@
-import sys, pathlib
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+
+
 import pytest
-import transparency_crypto as tc
+import transparency.crypto as tc
 
 REPORT = b"# HW4 AI-usage log\n| 2026-10-14 | critique | attempt1, 3 gaps named |\n"
 
@@ -58,3 +58,12 @@ def test_generator_h_is_fixed_and_valid():
     h = tc.generator_h()
     assert h == tc.generator_h()
     assert tc.sodium.crypto_core_ristretto255_is_valid_point(h)
+
+
+def test_attachment_roundtrip_and_binding():
+    sealed, opening = tc.seal(REPORT)
+    att = tc.seal_attachment(b"transcript...", sealed.commitment, opening)
+    assert tc.open_attachment(att, sealed.commitment, opening) == b"transcript..."
+    other_c = tc.commit(REPORT, tc.sodium.crypto_core_ristretto255_scalar_random())
+    with pytest.raises(ValueError):
+        tc.open_attachment(att, other_c, opening)

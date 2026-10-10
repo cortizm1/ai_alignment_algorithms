@@ -1,0 +1,7 @@
+# /etc/nginx/sites-available/jhu.nymo.finance — phase 1 (before the certificate exists)
+server {
+  listen 80; listen [::]:80;
+  server_name jhu.nymo.finance;
+  location /.well-known/acme-challenge/ { root /var/www/html; }
+  location / { return 301 https://$host$request_uri; }
+}

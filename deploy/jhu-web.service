@@ -1,0 +1,24 @@
+# /etc/systemd/system/jhu-web.service — FastHTML transparency site on 127.0.0.1:8010 (behind Anubis)
+[Unit]
+Description=jhu.nymo.finance transparency site (FastHTML)
+After=network.target
+
+[Service]
+User=jhu
+Group=jhu
+WorkingDirectory=/srv/jhu/app
+Environment=JHU_DATA_DIR=/srv/jhu/data
+Environment=JHU_PORT=8010
+Environment=JHU_PUBLIC_URL=https://jhu.nymo.finance
+ExecStart=/srv/jhu/app/.venv/bin/uvicorn web.app:app --host 127.0.0.1 --port 8010 --workers 1 --proxy-headers --forwarded-allow-ips 127.0.0.1
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/jhu/app/.venv
+ReadOnlyPaths=/srv/jhu/data
+
+[Install]
+WantedBy=multi-user.target

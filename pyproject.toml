@@ -2,7 +2,15 @@
 name = "algorithms-harness-tools"
 version = "0.1.0"
 requires-python = ">=3.11"
-dependencies = ["pysodium>=0.7", "cryptography"]
+dependencies = [
+    "pysodium>=0.7",
+    "cryptography",
+    "python-fasthtml>=0.14.13",
+    "monsterui>=1.0.47",
+    "uvicorn>=0.54.0",
+    "httpx>=0.28.1",
+    "markdown>=3.11",
+]
 
 [dependency-groups]
 dev = ["pytest"]
