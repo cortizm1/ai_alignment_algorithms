@@ -39,6 +39,25 @@ def create_app() -> Any:
         except Exception as exc:  # noqa: BLE001
             return ui_components.page(ui_components.error_card(str(exc)))
 
+    @app.route("/manifesto", methods=["get"])
+    def manifesto() -> Any:
+        """Public one-pager, readable by anyone: inline PDF, download, SHA3-256 as a subscript."""
+        try:
+            pdf = records.manifesto_pdf()
+            if pdf is None:
+                return Title("Manifesto"), ui_components.page(ui_components.error_card("The manifesto is not published yet."))
+            return Title("Manifesto · 601.433"), ui_components.manifesto_page(pdf)
+        except Exception as exc:  # noqa: BLE001
+            return ui_components.page(ui_components.error_card(str(exc)))
+
+    @app.route("/manifesto.pdf", methods=["get"])
+    def manifesto_file() -> Any:
+        """The same PDF as a file (inline for the viewer, downloadable by the browser)."""
+        pdf = records.manifesto_pdf()
+        if pdf is None:
+            return Response("not published", status_code=404, media_type="text/plain")
+        return Response(pdf, media_type="application/pdf", headers={"Content-Disposition": 'inline; filename="manifesto_onepager.pdf"'})
+
     @app.route("/hw/{n}", methods=["get"])
     def homework(n: int) -> Any:
         try:

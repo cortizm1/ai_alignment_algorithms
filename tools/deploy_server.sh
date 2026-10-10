@@ -27,8 +27,8 @@ case "${1:-status}" in
     # code -> /srv/jhu/app (owned by the unprivileged jhu user), deps via uv, systemd unit, nginx backend handed over
     ssh "$H" 'id -u jhu >/dev/null 2>&1 || useradd -r -m -d /srv/jhu/home -s /usr/sbin/nologin jhu; mkdir -p /srv/jhu/app /srv/jhu/data; chown -R jhu:jhu /srv/jhu'
     rsync -az --delete --exclude .venv --exclude __pycache__ --exclude '*.pyc' \
-      "$R/../web" "$R/../transparency" "$R/../pyproject.toml" "$R/../uv.lock" "$R/../docs/ai_policy_public.md" "$H:/srv/jhu/app/"
-    ssh "$H" 'mkdir -p /srv/jhu/app/docs && mv -f /srv/jhu/app/ai_policy_public.md /srv/jhu/app/docs/ && chown -R jhu:jhu /srv/jhu/app
+      "$R/../web" "$R/../transparency" "$R/../pyproject.toml" "$R/../uv.lock" "$R/../docs/ai_policy_public.md" "$R/../docs/manifesto_onepager.pdf" "$H:/srv/jhu/app/"
+    ssh "$H" 'mkdir -p /srv/jhu/app/docs && mv -f /srv/jhu/app/ai_policy_public.md /srv/jhu/app/manifesto_onepager.pdf /srv/jhu/app/docs/ && chown -R jhu:jhu /srv/jhu/app
       install -m755 /root/.local/bin/uv /usr/local/bin/uv; dpkg -s libsodium23 >/dev/null 2>&1 || apt-get install -y -qq libsodium23 >/dev/null
       sudo -u jhu -H bash -c "cd /srv/jhu/app && uv sync --frozen --no-dev --python 3.12 -q" 2>&1 | tail -2'
     rsync -az "$R/jhu-web.service" "$H:/etc/systemd/system/jhu-web.service"

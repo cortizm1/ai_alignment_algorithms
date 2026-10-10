@@ -38,3 +38,8 @@ def get_record(n: int, data_dir: Path = config.DATA_DIR) -> dict[str, Any] | Non
 def policy_markdown(path: Path = config.POLICY_FILE) -> str:
     """The public policy statement, markdown source."""
     return path.read_text() if path.exists() else "_Policy statement not published yet._"
+
+
+def manifesto_pdf(path: Path = config.MANIFESTO_FILE) -> bytes | None:
+    """The public one-page manifesto, raw PDF bytes, or None if not shipped."""
+    return path.read_bytes() if path.exists() else None

@@ -109,3 +109,13 @@ def test_attachment_hash_caption(client, sealed_hw):
     import hashlib
     r = client.post("/hw/4/open", data={"opening": sealed_hw})
     assert hashlib.sha3_256(b"%PDF-1.4 fake").hexdigest() in r.text
+
+
+def test_manifesto_public_with_hash(client, monkeypatch, tmp_path):
+    import hashlib
+    f = tmp_path / "m.pdf"; f.write_bytes(b"%PDF-1.4 manifesto")
+    monkeypatch.setattr(records.manifesto_pdf, "__defaults__", (f,))
+    r = client.get("/manifesto")
+    assert r.status_code == 200 and hashlib.sha3_256(b"%PDF-1.4 manifesto").hexdigest() in r.text and "Open the vault" not in r.text
+    raw = client.get("/manifesto.pdf")
+    assert raw.content == b"%PDF-1.4 manifesto" and raw.headers["content-type"].startswith("application/pdf")

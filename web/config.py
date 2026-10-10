@@ -11,6 +11,7 @@ REPO_ROOT: Path = Path(__file__).resolve().parent.parent
 DATA_DIR: Path = Path(os.environ.get("JHU_DATA_DIR", REPO_ROOT / "data")).resolve()
 #: Public policy statement (markdown).
 POLICY_FILE: Path = Path(os.environ.get("JHU_POLICY_FILE", REPO_ROOT / "docs" / "ai_policy_public.md")).resolve()
+MANIFESTO_FILE: Path = Path(os.environ.get("JHU_MANIFESTO_FILE", REPO_ROOT / "docs" / "manifesto_onepager.pdf")).resolve()
 PORT: int = int(os.environ.get("JHU_PORT", "8010"))
 PUBLIC_URL: str = os.environ.get("JHU_PUBLIC_URL", "https://jhu.nymo.finance").rstrip("/")
 #: Session-signing secret. The site keeps no sessions; this only stops FastHTML from writing .sesskey to disk.
